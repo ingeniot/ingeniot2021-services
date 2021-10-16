@@ -9,7 +9,6 @@ volumes:
     name: foo-emqx-log
     
 services:
-
   nodered:
     container_name: Node-red
     image: nodered/node-red:latest
