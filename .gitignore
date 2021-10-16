@@ -1,0 +1,4 @@
+mongodata
+.env
+app
+.log

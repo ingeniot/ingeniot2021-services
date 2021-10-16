@@ -1,0 +1,16 @@
+#Archivo para ejecutar una vez para crear la carpeta node modules
+version: "3.8"      
+
+services:
+
+    node_install:
+        container_name: node_install
+        image: "node:14"
+        #restart: always
+        #Carpeta de trabajo del contenedor
+        working_dir: /home/node/app
+        volumes: 
+            #Monta todo el contenido de la carpeta app dentro de la carpeta de trabajo
+            - ./app/:/home/node/app
+          
+        command: sh -c "npm install"

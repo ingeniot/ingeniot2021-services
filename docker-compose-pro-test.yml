@@ -1,0 +1,109 @@
+version: "3.8"
+
+volumes:
+    vol-emqx-data:
+        name: foo-emqx-data
+  #vol-emqx-etc:
+   # name: foo-emqx-etc
+    vol-emqx-log:
+        name: foo-emqx-log    
+#Archivo para ejecutar una vez para crear la carpeta node modules
+
+
+services:
+
+    node:
+        container_name: node
+        image: "node:14"
+        #restart: always
+        #Carpeta de trabajo del contenedor
+        working_dir: /home/node/app
+        volumes: 
+            #Monta todo el contenido de la carpeta app dentro de la carpeta de trabajo
+            - ./mycode/index.js:/home/node/app/index.js
+            #- ./app/:/home/node/app
+        ports:
+            - "3000:3000"
+            - "3001:3001"
+            - "80:3002"
+        links:
+            - emqx
+            - mongo
+        #command: sh -c "echo 'delaiyng 30 seconds' && sleep 30 && npm run build && npm run start"
+        command: sh -c "node index.js"
+    mongo:
+        container_name: mongo
+        image: mongo:4.4
+        #restart: always
+        #logging:
+        #driver: "none"
+        ports:
+            - ${MONGO_EXTERNAL_PORT}:27017
+        environment: 
+            TZ: "${TZ}"
+            MONGO_INITDB_ROOT_USERNAME: "${MONGO_USERNAME}"
+            MONGO_INITDB_ROOT_PASSWORD: "${MONGO_PASSWORD}"
+        volumes: 
+            - ./mongodata:/data/db 
+
+    emqx:
+        container_name: emqx
+        image:  emqx/emqx:4.2.3
+       #restart: always
+        ports: 
+        #:- ${emqxdashport}:18083
+            - 18083:18083
+    #      - 18084:18084
+            - 1883:1883
+            - 8083:8083
+    #      - 8084:8084
+            - 8085:8081
+        volumes:
+            - vol-emqx-data:/opt/emqx/data
+    #     - vol-emqx-etc:/opt/emqx/etc
+            - vol-emqx-log:/opt/emqx/log
+        links:
+            - mongo
+    # link especial para conectarse con la api que esta en node fuera del contenedor
+        extra_hosts:
+            - "localhost:192.168.0.104"
+        environment:
+            EMQX_NAME: ingeniot
+            EMQX_HOST: 127.0.0.1
+            TZ: "${TZ}"
+         #DASHBOARD ACCESS
+            EMQX_DASHBOARD__DEFAULT_USER__LOGIN: "admin"
+            EMQX_DASHBOARD__DEFAULT_USER__PASSWORD: "${EMQX_DASHBOARD_DEFAULT_USER_PASSWORD}"
+        # DEFAULT APP SECRET (acceso a la API)
+            EMQX_MANAGEMENT__DEFAULT_APPLICATION__SECRET: "${EMQX_MANAGEMENT_DEFAULT_APPLICATION_SECRET}"
+        #EMQX CONF   (Fundamental para que no deje entrar sin usuario y contraseña)
+            EMQX_ALLOW_ANONYMOUS: "false" 
+            EMQX_NOMATCH: "deny"       
+        #MONGO CONNECTION
+            EMQX_AUTH__MONGO__TYPE: single
+            EMQX_AUTH__MONGO__SERVER: "mongo:${MONGO_EXTERNAL_PORT}"
+            EMQX_AUTH__MONGO__POOL: 8
+
+            EMQX_AUTH__MONGO__LOGIN: "${MONGO_USERNAME}"
+            EMQX_AUTH__MONGO__PASSWORD: "${MONGO_PASSWORD}"
+            EMQX_AUTH__MONGO__AUTH_SOURCE: "admin"
+
+            EMQX_AUTH__MONGO__DATABASE: "ingeniot"
+            EMQX_AUTH__MONGO__AUTH__QUERY__COLLECTION: "emqxauthrules"
+
+            EMQX_AUTH__MONGO__SUPER_QUERY__COLLECTION: "emqxauthrules"
+            EMQX_AUTH__MONGO__SUPER_QUERY__SUPER_FIELD: "is_superuser"
+            EMQX_AUTH__MONGO__SUPER_QUERY__SELECTOR: "username=%u"
+            EMQX_AUTH__MONGO__SUPER_QUERY: "off"      
+
+            EMQX_AUTH__MONGO__AUTH_QUERY__PASSWORD_HASH: plain
+            EMQX_AUTH__MONGO__AUTH_QUERY__PASSWORD_FIELD: "password"
+            EMQX_AUTH__MONGO__AUTH_QUERY__SELECTOR: "username=%u"
+
+            EMQX_LISTENER__TCP__EXTERNAL__MAX__CONNECTIONS: 1000
+
+            EMQX_AUTH__MONGO__ACL_QUERY: "on"
+            EMQX_AUTH__MONGO__ACL_QUERY__COLLECTION: "emqxauthrules"      
+            EMQX_AUTH__MONGO__ACL_QUERY__SELECTOR: "username=%u"
+
+            EMQX_LOADED_PLUGINS: "emqx_recon,emqx_retainer,emqx_managment,emqx_dashboard,emqx_auth_mongo"

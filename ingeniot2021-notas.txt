@@ -1,0 +1,48 @@
+VPS
+    Conexión
+        ssh -i c:\Users\bache\Documents\Desarrollos\IoT2021\ingeniot2021.pem ubuntu@3.23.116.191
+    Primeros comandos desde carpeta ubuntu (carpeta del usuario ubuntu)
+        sudo apt-get update                     Actualiza listados de aplicaciones disponibles para descarga de repositorios de ubuntu
+        wget https://get.docker.com             Descarga instalador de docker
+        sudo mv index.html install_docker.sh     Renombra el archivo. La extensión .sh es para que sea un bash (scipt ejecutable)
+        sudo chmod 777 install_docker.sh         Otorga privilegios al archivo. Cualquier usuario lo puede ver. De todas maneras el unico usuario actual es ubuntu
+        sudo ./install_docker.sh                 Se ejecuta el bash, instalando docker
+        sudo rm install_docker.sh               Elimina el archivo bash ya utilizado
+            sudo usermod -aG docker ubuntu      Opcional. Le da privilegios root a contenedores de docker en el host de docker
+        sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose      Instala docker-compose. Obtenido desde https://docs.docker.com/compose/install/  (opción linux)
+        sudo chmod +x /usr/local/bin/docker-compose         Otorga permiso de ejecución al binario
+
+        sudo git clone https://github.com/ingeniot/IoT2021_services.git sudo git clone ruta repositorio.git     (obtenida desde github)  Subir repositorio services desde github al VPS
+        mv IoT2021_services ingeniot            			Cambia nombre de la carpeta por uno mas simple
+        cd ingeniot                             			Acceder a la carpeta creada
+
+        sudo nano .env                               Se crea archivo .env nuevo
+            Copiar ontenido .env de services en el editor
+            cAMBIAR TIMEZONE a UTC
+
+         // Crear .env autmáticamente con menu
+
+	sudo docker-compose -f docker-compose-pro.yml up
+
+              
+        sudo git clone https://github.com/ingeniot/IoT2021_app.git      En la carpeta del VPS ingeniot hay que clonar la aplicación
+        sudo mv IoT2021_app app                                         Renombra la carpeta
+		incluir en el gitignore de services la carpeta app para evitar conflictos
+        sudo docker-compose -f docker-compose-node-install.yml up       Instala los module nuxt en el vps
+
+        sudo docker-compose -f  docker-compose-pro.yml up -d
+        Ejecutar una vez en la carpeta ingeniot del vps para que cree la carpeta node modules
+
+        Crear variables de entorno de la aplicación en VPS en la capeta app
+            sudo nano .env
+        En las variables de entorno reemplazar localhost por la ip publica del VPS
+
+
+Pendientes:
+8/8/21 En VPS
+Iconos de barra lateral
+No aprece el prewie del widget de iot indicator
+No se pueden crear reglas
+
+            
+
