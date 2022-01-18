@@ -53,7 +53,7 @@ services:
 
   # link especial para conectarse con la api que esta en node fuera del contenedor desde localhost al ip de la máquina
     extra_hosts:
-      - "localhost:192.168.20.105"
+      - "localhost:192.168.1.106"
 
     environment:
       EMQX_NAME: ingeniot
