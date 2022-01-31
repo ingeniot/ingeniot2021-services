@@ -29,7 +29,8 @@ services:
         links:
             - emqx
             - mongo
-        command: sh -c "echo 'delaiyng 30 seconds' && sleep 30  && npm run start"
+#        command: sh -c "echo 'delaiyng 30 seconds' && sleep 30  && npm run start"
+        command: sh -c "echo 'delaiyng 30 seconds' && sleep 30 && npm run build && npm run start"
         #command: sh -c "node index.js"
     mongo:
         container_name: mongo
